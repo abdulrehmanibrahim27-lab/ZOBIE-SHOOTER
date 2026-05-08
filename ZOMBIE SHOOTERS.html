@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="https://z-cdn-media.chatglm.cn/files/5a3cea75-986c-405c-a128-113ed309df61.png?auth_key=1872534011-28b4448ff241463084dc82fcdecd3505-0-ceb6408f2b513745ad47a310264cf571">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZOMBIE SHOOTERS - ADDICTIVE MODE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: #0a1f2b;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            touch-action: pan-y pinch-zoom;
+        }
+        
+        .game-wrapper {
+            background: #123a4d;
+            padding: 20px 25px 25px 25px;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            max-width: 100%;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            aspect-ratio: 900/500;
+            border-radius: 25px;
+            background: #1c4e66;
+            border: 4px solid #3f8ab3;
+            outline: none;
+            cursor: none;
+            touch-action: none;
+        }
+        
+        canvas:focus {
+            border-color: #ffaa33;
+        }
+        
+        .top-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0e3345;
+            padding: 12px 25px;
+            border-radius: 40px;
+            margin: 15px 0 10px 0;
+            border: 2px solid #327599;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .name-section {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .player-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .player-box span {
+            font-size: 26px;
+        }
+        
+        .player-box input {
+            background: #0b2738;
+            border: 2px solid #2f70a0;
+            border-radius: 30px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 17px;
+            width: 160px;
+            text-align: center;
+        }
+        
+        .player-box input:focus {
+            border-color: #f90;
+            background: #144257;
+            outline: none;
+        }
+        
+        .timer {
+            background: #0a1f2c;
+            padding: 5px 25px;
+            border-radius: 40px;
+            font-size: 38px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #ffe066;
+            letter-spacing: 3px;
+        }
+        
+        .turn-display {
+            background: #1a485f;
+            color: white;
+            text-align: center;
+            font-size: 26px;
+            padding: 10px;
+            border-radius: 40px;
+            margin: 8px 0;
+            border: 2px solid #ff9933;
+        }
+        
+        .turn-display span {
+            color: #ffdb99;
+            font-size: 30px;
+        }
+        
+        .scores {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 20px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .score-badge {
+            background: #154455;
+            padding: 6px 25px;
+            border-radius: 30px;
+        }
+        
+        .mobile-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background: #0e3345;
+            border-radius: 30px;
+        }
+        
+        .mobile-btn {
+            background: #2f70a0;
+            border: none;
+            color: white;
+            font-size: 30px;
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 5px 0 #124257;
+            text-align: center;
+            font-weight: bold;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+        
+        .mobile-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        
+        .fire-btn {
+            background: #d48d2b;
+            grid-column: span 3;
+            font-size: 24px;
+            padding: 15px;
+        }
+        
+        .winner-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .winner-card {
+            background: #154f6b;
+            padding: 50px 80px;
+            border-radius: 70px;
+            border: 6px solid #ffaa33;
+            text-align: center;
+            box-shadow: 0 0 80px #ffaa33;
+            animation: winPopup 0.4s;
+            max-width: 90%;
+        }
+        
+        @keyframes winPopup {
+            0% { transform: scale(0.2); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .winner-card h1 {
+            font-size: 60px;
+            color: #ffe68f;
+            margin-bottom: 20px;
+        }
+        
+        .trophy {
+            font-size: 130px;
+            filter: drop-shadow(0 0 20px gold);
+        }
+        
+        .winner-name {
+            font-size: 60px;
+            color: #ffdb99;
+            background: #0a2a38;
+            padding: 15px 50px;
+            border-radius: 60px;
+            margin-top: 25px;
+            font-weight: bold;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .restart-game {
+            background: #d48d2b;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            font-size: 22px;
+            border-radius: 40px;
+            margin-top: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #7a4f1a;
+            width: 100%;
+        }
+        
+        .restart-game:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        
+        .help-text {
+            color: #b3d9ff;
+            text-align: center;
+            font-size: 17px;
+            margin: 8px 0;
+        }
+        
+        .sound-toggle {
+            background: #2f70a0;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .combo-indicator {
+            position: absolute;
+            top: 120px;
+            right: 40px;
+            background: rgba(0,0,0,0.7);
+            color: #ffaa33;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 2px solid #ffaa33;
+            z-index: 100;
+            display: none;
+        }
+        
+        .achievement-popup {
+            position: fixed;
+            top: 20px;
+            right: -300px;
+            background: linear-gradient(135deg, #ffaa33, #ff6b6b);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 10000;
+            transition: right 0.5s;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        
+        .achievement-popup.show {
+            right: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-wrapper {
+                padding: 15px;
+                width: 100%;
+            }
+            .mobile-controls {
+                display: grid;
+            }
+            .player-box input {
+                width: 120px;
+            }
+            .timer {
+                font-size: 28px;
+                padding: 5px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <canvas id="gameCanvas" width="900" height="500" tabindex="0"></canvas>
+        
+        <div class="top-panel">
+            <div class="name-section">
+                <div class="player-box">
+                    <span>🔵</span>
+                    <input type="text" id="player1Name" placeholder="Player 1" value="PLAYER 1">
+                </div>
+                <div class="player-box">
+                    <span>🟠</span>
+                    <input type="text" id="player2Name" placeholder="Player 2" value="PLAYER 2">
+                </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <button class="sound-toggle" id="soundToggle">🔊 Sound On</button>
+                <div class="timer" id="timerDisplay">30</div>
+            </div>
+        </div>
+        
+        <div class="turn-display" id="turnIndicator">
+            <span id="currentPlayerName">PLAYER 1</span>'s turn
+        </div>
+        
+        <div class="scores">
+            <div class="score-badge" id="p1ScoreDisplay">PLAYER 1: 0</div>
+            <div class="score-badge" id="p2ScoreDisplay">PLAYER 2: 0</div>
+        </div>
+        
+        <div class="mobile-controls" id="mobileControls">
+            <button class="mobile-btn" id="mobileUp">⬆️</button>
+            <button class="mobile-btn" id="mobileDown">⬇️</button>
+            <button class="mobile-btn" id="mobileLeft">⬅️</button>
+            <button class="mobile-btn" id="mobileRight">➡️</button>
+            <button class="mobile-btn fire-btn" id="mobileFire">🔥 FIRE</button>
+        </div>
+        
+        <div class="help-text" id="helpMessage">
+            ⏸️ GAME PAUSED · <span style="color:#ffdb99">PRESS ENTER</span> to start <span id="nextPlayerHint">PLAYER 1</span>'s turn
+        </div>
+        
+        <button class="restart-game" id="restartBtn">🔄 New Game</button>
+    </div>
+    
+    <div id="resultOverlay" class="winner-screen hidden">
+        <div class="winner-card">
+            <h1>WINNER</h1>
+            <div class="trophy">🏆</div>
+            <div class="winner-name" id="winnerBigName">Alex</div>
+        </div>
+    </div>
+    
+    <div class="combo-indicator" id="comboIndicator">🔥 0x</div>
+    <div class="achievement-popup" id="achievementPopup"></div>
+    
+    <script>
+        (function() {
+            // === ADDICTIVE ZOMBIE SHOOTER – WITH EXTRA FEATURES ===
+            
+            // DOM
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.focus();
+            
+            const timerDisplay = document.getElementById('timerDisplay');
+            const turnDisplay = document.getElementById('turnIndicator');
+            const currentPlayerSpan = document.getElementById('currentPlayerName');
+            const p1Input = document.getElementById('player1Name');
+            const p2Input = document.getElementById('player2Name');
+            const p1ScoreEl = document.getElementById('p1ScoreDisplay');
+            const p2ScoreEl = document.getElementById('p2ScoreDisplay');
+            const restartButton = document.getElementById('restartBtn');
+            const winnerOverlay = document.getElementById('resultOverlay');
+            const winnerNameEl = document.getElementById('winnerBigName');
+            const soundToggle = document.getElementById('soundToggle');
+            const helpMessage = document.getElementById('helpMessage');
+            const nextPlayerHint = document.getElementById('nextPlayerHint');
+            const comboIndicator = document.getElementById('comboIndicator');
+            const achievementPopup = document.getElementById('achievementPopup');
+            
+            // Mobile buttons
+            const mobileUp = document.getElementById('mobileUp');
+            const mobileDown = document.getElementById('mobileDown');
+            const mobileLeft = document.getElementById('mobileLeft');
+            const mobileRight = document.getElementById('mobileRight');
+            const mobileFire = document.getElementById('mobileFire');
+            
+            // ========== ADDICTIVE FEATURES ==========
+            let combo = 0;
+            let comboMultiplier = 1;
+            let lastKillTime = 0;
+            let headshots = 0;
+            let totalKills = 0;
+            let floatingTexts = [];
+            let shakeIntensity = 0;
+            let achievements = {
+                firstBlood: false,
+                headshotMaster: false,
+                comboKing: false,
+                zombieSlayer: false
+            };
+            let zombieTypes = [
+                { color: '#ff9a3c', speed: 1.3, size: 18, points: 100, headSize: 6 }, // Normal
+                { color: '#ff5555', speed: 2.0, size: 15, points: 200, headSize: 5 }, // Fast
+                { color: '#8b4513', speed: 0.8, size: 30, points: 500, headSize: 8 }, // Tank
+                { color: '#9370db', speed: 1.5, size: 12, points: 150, headSize: 4 }   // Toxic
+            ];
+            let powerUps = [];
+            let messages = [];
+            let screenFlash = 0;
+            let highScore = parseInt(localStorage.getItem('zombieHighScore')) || 0;
+            
+            // ========== AUDIO ==========
+            let soundEnabled = true;
+            let audioContext = null;
+            
+            function initAudio() {
+                if (audioContext) return;
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) { console.log('Web Audio not supported'); }
+            }
+            
+            function playShootSound() {
+                if (!soundEnabled || !audioContext) return;
+                try {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(880, audioContext.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.15);
+                } catch(e) {}
+            }
+            
+            function playDeathSound(pitch = 1) {
+                if (!soundEnabled || !audioContext) return;
+                try {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(220 * pitch, audioContext.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110 * pitch, audioContext.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.2);
+                } catch(e) {}
+            }
+            
+            function playInfectionSound() {
+                if (!soundEnabled || !audioContext) return;
+                try {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(330, audioContext.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.5);
+                    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.5);
+                } catch(e) {}
+            }
+            
+            function playTurnEndSound() {
+                if (!soundEnabled || !audioContext) return;
+                try {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523, audioContext.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(783, audioContext.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.2);
+                } catch(e) {}
+            }
+            
+            function playPowerUpSound() {
+                if (!soundEnabled || !audioContext) return;
+                try {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(659, audioContext.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1318, audioContext.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.start();
+                    osc.stop(audioContext.currentTime + 0.2);
+                } catch(e) {}
+            }
+            
+            soundToggle.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                soundToggle.textContent = soundEnabled ? '🔊 Sound On' : '🔈 Sound Off';
+                if (soundEnabled && !audioContext) {
+                    initAudio();
+                    if (audioContext) {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        gain.gain.value = 0.1;
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.1);
+                    }
+                }
+            });
+            
+            function initAudioOnFirstTouch() {
+                initAudio();
+                document.removeEventListener('touchstart', initAudioOnFirstTouch);
+                document.removeEventListener('click', initAudioOnFirstTouch);
+            }
+            document.addEventListener('touchstart', initAudioOnFirstTouch);
+            document.addEventListener('click', initAudioOnFirstTouch);
+            
+            // ========== CONSTANTS ==========
+            const W = 900, H = 500;
+            const MID = W / 2;
+            const PLAYER_SIZE = 22;
+            const ZOMBIE_SIZE = 18;
+            const BULLET_SIZE = 6;
+            const PLAYER_SPEED = 5.5;
+            const BULLET_SPEED = 8;
+            const ZOMBIE_SPEED = 1.3;
+            const SPAWN_DELAY = 35;
+            
+            // ========== GAME STATE ==========
+            let currentPlayer = 1;            // 1 or 2
+            let gameActive = false;            // true only when timer counts down (actively playing)
+            let timeRemaining = 30;
+            let gameTimer = null;
+            
+            let totalP1 = 0, totalP2 = 0;
+            let turnScore = 0;
+            
+            let playerX, playerY;
+            
+            let bullets = [];
+            let zombies = [];
+            let spawnCounter = 0;
+            
+            // Controls
+            let up = false;
+            let down = false;
+            let left = false;
+            let right = false;
+            let space = false;
+            let shotCooldown = 0;
+            
+            // Power-up effects
+            let rapidFire = false;
+            let doublePoints = false;
+            let powerUpTimer = null;
+            
+            // ========== HELPER ==========
+            function getP1Name() { return p1Input.value.trim() || 'Player 1'; }
+            function getP2Name() { return p2Input.value.trim() || 'Player 2'; }
+            
+            function updateUITurnAndScores() {
+                if (currentPlayer === 1) {
+                    currentPlayerSpan.textContent = getP1Name();
+                } else {
+                    currentPlayerSpan.textContent = getP2Name();
+                }
+                p1ScoreEl.textContent = `${getP1Name()}: ${totalP1}`;
+                p2ScoreEl.textContent = `${getP2Name()}: ${totalP2}`;
+                nextPlayerHint.textContent = currentPlayer === 1 ? getP1Name() : getP2Name();
+                helpMessage.innerHTML = gameActive 
+                    ? `🎮 TURN ACTIVE · <span style="color:#ffdb99">${currentPlayer === 1 ? getP1Name() : getP2Name()}</span>`
+                    : `⏸️ GAME PAUSED · <span style="color:#ffdb99">PRESS ENTER</span> to start <span id="nextPlayerHint">${currentPlayer === 1 ? getP1Name() : getP2Name()}</span>'s turn`;
+            }
+            
+            function showAchievement(title, reward) {
+                achievementPopup.textContent = `🏆 ACHIEVEMENT: ${title} +${reward}`;
+                achievementPopup.classList.add('show');
+                setTimeout(() => achievementPopup.classList.remove('show'), 3000);
+            }
+            
+            function checkAchievements() {
+                if (turnScore >= 1000 && !achievements.firstBlood) {
+                    achievements.firstBlood = true;
+                    showAchievement('FIRST BLOOD', '100');
+                    totalP1 += 100;
+                }
+                if (headshots >= 5 && !achievements.headshotMaster) {
+                    achievements.headshotMaster = true;
+                    showAchievement('HEADSHOT MASTER', '500');
+                    if (currentPlayer === 1) totalP1 += 500;
+                    else totalP2 += 500;
+                }
+                if (combo >= 10 && !achievements.comboKing) {
+                    achievements.comboKing = true;
+                    showAchievement('COMBO KING', '1000');
+                    if (currentPlayer === 1) totalP1 += 1000;
+                    else totalP2 += 1000;
+                }
+                if (totalKills >= 50 && !achievements.zombieSlayer) {
+                    achievements.zombieSlayer = true;
+                    showAchievement('ZOMBIE SLAYER', '2000');
+                    if (currentPlayer === 1) totalP1 += 2000;
+                    else totalP2 += 2000;
+                }
+            }
+            
+            function spawnFloatingText(text, x, y, color, size = 20) {
+                floatingTexts.push({
+                    text,
+                    x, y,
+                    color,
+                    size,
+                    life: 60,
+                    vy: -1
+                });
+            }
+            
+            function spawnPowerUp() {
+                if (Math.random() < 0.01 && gameActive && powerUps.length < 3) {
+                    let type = Math.random();
+                    let powerType;
+                    if (type < 0.33) powerType = 'rapidfire';
+                    else if (type < 0.66) powerType = 'doublepoints';
+                    else powerType = 'extratime';
+                    
+                    powerUps.push({
+                        x: Math.random() * (W - 100) + 50,
+                        y: Math.random() * (H - 100) + 50,
+                        type: powerType,
+                        active: true,
+                        life: 300 // 5 seconds at 60fps
+                    });
+                }
+            }
+            
+            function activatePowerUp(type) {
+                playPowerUpSound();
+                
+                if (type === 'rapidfire') {
+                    rapidFire = true;
+                    spawnFloatingText('RAPID FIRE!', playerX, playerY - 40, '#ffaa33', 24);
+                    if (powerUpTimer) clearTimeout(powerUpTimer);
+                    powerUpTimer = setTimeout(() => {
+                        rapidFire = false;
+                    }, 5000);
+                } else if (type === 'doublepoints') {
+                    doublePoints = true;
+                    spawnFloatingText('DOUBLE POINTS!', playerX, playerY - 40, '#ffaa33', 24);
+                    if (powerUpTimer) clearTimeout(powerUpTimer);
+                    powerUpTimer = setTimeout(() => {
+                        doublePoints = false;
+                    }, 5000);
+                } else if (type === 'extratime') {
+                    timeRemaining += 10;
+                    timerDisplay.textContent = timeRemaining;
+                    spawnFloatingText('+10 SECONDS!', playerX, playerY - 40, '#ffaa33', 24);
+                }
+            }
+            
+            // ========== WINNER SCREEN ==========
+            function showWinner(winnerNum) {
+                gameActive = false;
+                if (gameTimer) { clearInterval(gameTimer); gameTimer = null; }
+                
+                // Check high score
+                let finalScore = Math.max(totalP1, totalP2);
+                if (finalScore > highScore) {
+                    highScore = finalScore;
+                    localStorage.setItem('zombieHighScore', highScore);
+                    spawnFloatingText('NEW HIGH SCORE!', MID, 100, 'gold', 40);
+                }
+                
+                let winName = '';
+                if (winnerNum === 1) winName = getP1Name();
+                else if (winnerNum === 2) winName = getP2Name();
+                else winName = (totalP1 > totalP2) ? getP1Name() : (totalP2 > totalP1) ? getP2Name() : 'TIE GAME';
+                
+                winnerNameEl.textContent = winName;
+                winnerOverlay.classList.remove('hidden');
+                setTimeout(() => winnerOverlay.classList.add('hidden'), 3000);
+            }
+            
+            // ========== END TURN ==========
+            function endTurn() {
+                if (!gameActive) return;
+                gameActive = false;
+                playTurnEndSound();
+                
+                if (gameTimer) { clearInterval(gameTimer); gameTimer = null; }
+                
+                if (currentPlayer === 1) totalP1 += turnScore;
+                else totalP2 += turnScore;
+                
+                p1ScoreEl.textContent = `${getP1Name()}: ${totalP1}`;
+                p2ScoreEl.textContent = `${getP2Name()}: ${totalP2}`;
+                
+                // Reset power-ups
+                rapidFire = false;
+                doublePoints = false;
+                if (powerUpTimer) clearTimeout(powerUpTimer);
+                
+                if (currentPlayer === 2) {
+                    let winner;
+                    if (totalP1 > totalP2) winner = 1;
+                    else if (totalP2 > totalP1) winner = 2;
+                    else winner = 0;
+                    showWinner(winner);
+                } else {
+                    currentPlayer = 2;
+                    updateUITurnAndScores();
+                    bullets = [];
+                    zombies = [];
+                    powerUps = [];
+                    turnScore = 0;
+                    combo = 0;
+                    comboIndicator.style.display = 'none';
+                    timerDisplay.textContent = '30';
+                    playerX = (currentPlayer === 1) ? 150 : W - 150;
+                    playerY = H / 2;
+                }
+                helpMessage.innerHTML = `⏸️ GAME PAUSED · <span style="color:#ffdb99">PRESS ENTER</span> to start <span>${currentPlayer === 1 ? getP1Name() : getP2Name()}</span>'s turn`;
+            }
+            
+            // ========== ACTIVATE TURN ==========
+            function startTurn() {
+                if (gameActive) return;
+                
+                if (currentPlayer === 1) {
+                    playerX = 150;
+                } else {
+                    playerX = W - 150;
+                }
+                playerY = H / 2;
+                
+                bullets = [];
+                zombies = [];
+                powerUps = [];
+                turnScore = 0;
+                combo = 0;
+                headshots = 0;
+                floatingTexts = [];
+                comboIndicator.style.display = 'none';
+                timeRemaining = 30;
+                timerDisplay.textContent = '30';
+                spawnCounter = 0;
+                shotCooldown = 0;
+                
+                up = false; down = false; left = false; right = false; space = false;
+                
+                gameActive = true;
+                
+                if (gameTimer) clearInterval(gameTimer);
+                gameTimer = setInterval(() => {
+                    if (!gameActive) return;
+                    timeRemaining--;
+                    timerDisplay.textContent = timeRemaining;
+                    if (timeRemaining <= 0) {
+                        timeRemaining = 0;
+                        timerDisplay.textContent = '0';
+                        endTurn();
+                    }
+                }, 1000);
+                
+                updateUITurnAndScores();
+                helpMessage.innerHTML = `🎮 TURN ACTIVE · <span style="color:#ffdb99">${currentPlayer === 1 ? getP1Name() : getP2Name()}</span>`;
+                canvas.focus();
+            }
+            
+            // ========== SPAWN ==========
+            function trySpawn() {
+                if (!gameActive) return;
+                if (zombies.length > 25) return;
+                spawnCounter++;
+                if (spawnCounter < SPAWN_DELAY) return;
+                spawnCounter = 0;
+                
+                // Random zombie type
+                let typeIndex = Math.floor(Math.random() * zombieTypes.length);
+                let type = zombieTypes[typeIndex];
+                
+                if (currentPlayer === 1) {
+                    let x = W - 100 - Math.random() * 150;
+                    let y = 50 + Math.random() * (H - 100);
+                    zombies.push({ 
+                        x, y, 
+                        color: type.color,
+                        size: type.size,
+                        speed: type.speed,
+                        points: type.points,
+                        headSize: type.headSize,
+                        type: typeIndex
+                    });
+                } else {
+                    let x = 100 + Math.random() * 150;
+                    let y = 50 + Math.random() * (H - 100);
+                    zombies.push({ 
+                        x, y, 
+                        color: type.color,
+                        size: type.size,
+                        speed: type.speed,
+                        points: type.points,
+                        headSize: type.headSize,
+                        type: typeIndex
+                    });
+                }
+            }
+            
+            // ========== SHOOT ==========
+            function shoot() {
+                if (!gameActive) return;
+                if (shotCooldown > 0) shotCooldown--;
+                
+                let canShoot = space && shotCooldown <= 0;
+                if (canShoot) {
+                    let bulletX, bulletY, vx;
+                    if (currentPlayer === 1) {
+                        bulletX = playerX + PLAYER_SIZE + 5;
+                        bulletY = playerY;
+                        vx = BULLET_SPEED;
+                    } else {
+                        bulletX = playerX - PLAYER_SIZE - 5;
+                        bulletY = playerY;
+                        vx = -BULLET_SPEED;
+                    }
+                    
+                    // Screen flash on shoot
+                    screenFlash = 3;
+                    
+                    bullets.push({ x: bulletX, y: bulletY, vx, vy: 0, size: BULLET_SIZE });
+                    playShootSound();
+                    
+                    shotCooldown = rapidFire ? 3 : 10;
+                }
+            }
+            
+            // ========== UPDATE ==========
+            function update() {
+                if (!gameActive) return;
+                
+                // Screen shake decay
+                if (shakeIntensity > 0) shakeIntensity *= 0.9;
+                if (screenFlash > 0) screenFlash--;
+                
+                // Movement boundaries per player
+                if (up) playerY = Math.max(PLAYER_SIZE, playerY - PLAYER_SPEED);
+                if (down) playerY = Math.min(H - PLAYER_SIZE, playerY + PLAYER_SPEED);
+                if (left) {
+                    if (currentPlayer === 1) {
+                        playerX = Math.max(PLAYER_SIZE, playerX - PLAYER_SPEED);
+                    } else {
+                        playerX = Math.max(MID + 10, playerX - PLAYER_SPEED);
+                    }
+                }
+                if (right) {
+                    if (currentPlayer === 1) {
+                        playerX = Math.min(MID - 10, playerX + PLAYER_SPEED);
+                    } else {
+                        playerX = Math.min(W - PLAYER_SIZE, playerX + PLAYER_SPEED);
+                    }
+                }
+                
+                trySpawn();
+                spawnPowerUp();
+                shoot();
+                
+                // Update floating texts
+                for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                    let t = floatingTexts[i];
+                    t.life--;
+                    t.y += t.vy;
+                    if (t.life <= 0) floatingTexts.splice(i, 1);
+                }
+                
+                // Power-ups
+                for (let i = powerUps.length - 1; i >= 0; i--) {
+                    let p = powerUps[i];
+                    p.life--;
+                    
+                    // Check collision with player
+                    let dx = playerX - p.x;
+                    let dy = playerY - p.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < PLAYER_SIZE + 15) {
+                        activatePowerUp(p.type);
+                        powerUps.splice(i, 1);
+                        continue;
+                    }
+                    
+                    if (p.life <= 0) {
+                        powerUps.splice(i, 1);
+                    }
+                }
+                
+                // Bullets
+                for (let i = bullets.length - 1; i >= 0; i--) {
+                    let b = bullets[i];
+                    b.x += b.vx;
+                    if (b.x < 0 || b.x > W) { bullets.splice(i, 1); continue; }
+                    
+                    let hit = false;
+                    for (let j = zombies.length - 1; j >= 0; j--) {
+                        let z = zombies[j];
+                        let dx = b.x - z.x;
+                        let dy = b.y - z.y;
+                        
+                        // Headshot check
+                        let headDist = Math.sqrt(Math.pow(b.x - z.x, 2) + Math.pow(b.y - (z.y - z.headSize * 2), 2));
+                        let pointsEarned = z.points;
+                        
+                        if (headDist < 8) {
+                            pointsEarned = z.points * 2.5; // Headshot bonus
+                            headshots++;
+                            spawnFloatingText('HEADSHOT!', z.x, z.y - 30, '#ff0000', 24);
+                            shakeIntensity = 5;
+                        } else if (Math.sqrt(dx*dx + dy*dy) < BULLET_SIZE + z.size) {
+                            // Normal hit
+                        } else {
+                            continue;
+                        }
+                        
+                        // Combo system
+                        let now = Date.now();
+                        if (now - lastKillTime < 1000) {
+                            combo++;
+                            comboMultiplier = Math.min(3, 1 + combo * 0.2);
+                            comboIndicator.style.display = 'block';
+                            comboIndicator.innerHTML = `🔥 ${combo}x`;
+                        } else {
+                            combo = 1;
+                            comboMultiplier = 1;
+                        }
+                        lastKillTime = now;
+                        
+                        // Apply double points
+                        if (doublePoints) pointsEarned *= 2;
+                        
+                        turnScore += Math.floor(pointsEarned * comboMultiplier);
+                        totalKills++;
+                        
+                        spawnFloatingText(`+${Math.floor(pointsEarned * comboMultiplier)}`, z.x, z.y, '#ffaa33', 20);
+                        playDeathSound(z.type === 1 ? 1.5 : z.type === 2 ? 0.7 : 1);
+                        
+                        zombies.splice(j, 1);
+                        hit = true;
+                        checkAchievements();
+                        break;
+                    }
+                    if (hit) bullets.splice(i, 1);
+                }
+                
+                // Zombies move toward player
+                for (let z of zombies) {
+                    let dx = playerX - z.x;
+                    let dy = playerY - z.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist > 1) {
+                        z.x += (dx / dist) * z.speed;
+                        z.y += (dy / dist) * z.speed;
+                    }
+                }
+                
+                // Zombie collision
+                for (let i = zombies.length - 1; i >= 0; i--) {
+                    let z = zombies[i];
+                    let dx = playerX - z.x;
+                    let dy = playerY - z.y;
+                    if (Math.sqrt(dx*dx + dy*dy) < PLAYER_SIZE + z.size) {
+                        zombies.splice(i, 1);
+                        playInfectionSound();
+                        shakeIntensity = 15;
+                        
+                        if (currentPlayer === 1) totalP2 += 500;
+                        else totalP1 += 500;
+                        
+                        endTurn();
+                        return;
+                    }
+                }
+            }
+            
+            // ========== DRAW ==========
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                
+                // Screen shake effect
+                ctx.save();
+                if (shakeIntensity > 0) {
+                    ctx.translate(
+                        (Math.random() - 0.5) * shakeIntensity,
+                        (Math.random() - 0.5) * shakeIntensity
+                    );
+                }
+                
+                // Screen flash
+                if (screenFlash > 0) {
+                    ctx.fillStyle = `rgba(255, 255, 200, ${screenFlash * 0.1})`;
+                    ctx.fillRect(0, 0, W, H);
+                }
+                
+                // Midline
+                ctx.strokeStyle = '#ffaa33';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(MID, 0);
+                ctx.lineTo(MID, H);
+                ctx.stroke();
+                
+                // Background tint
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = currentPlayer === 1 ? '#2a7fff' : '#ff9a3c';
+                if (currentPlayer === 1) ctx.fillRect(0, 0, MID, H);
+                else ctx.fillRect(MID, 0, MID, H);
+                ctx.globalAlpha = 1;
+                
+                // Power-ups
+                for (let p of powerUps) {
+                    ctx.save();
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = 'gold';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 15, 0, Math.PI*2);
+                    
+                    if (p.type === 'rapidfire') ctx.fillStyle = '#ffaa33';
+                    else if (p.type === 'doublepoints') ctx.fillStyle = '#ff6b6b';
+                    else ctx.fillStyle = '#4ecdc4';
+                    
+                    ctx.fill();
+                    ctx.font = '20px Arial';
+                    ctx.fillStyle = 'white';
+                    ctx.shadowBlur = 0;
+                    ctx.fillText('?', p.x - 7, p.y + 8);
+                    ctx.restore();
+                }
+                
+                // Zombies
+                for (let z of zombies) {
+                    ctx.save();
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#000';
+                    
+                    // Body
+                    ctx.beginPath();
+                    ctx.arc(z.x, z.y, z.size, 0, Math.PI*2);
+                    ctx.fillStyle = z.color;
+                    ctx.fill();
+                    
+                    // Eyes
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#111';
+                    ctx.beginPath();
+                    ctx.arc(z.x - 6, z.y - 5, 4, 0, Math.PI*2);
+                    ctx.arc(z.x + 6, z.y - 5, 4, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    // Headshot indicator (tiny dot on head)
+                    ctx.fillStyle = '#ff0000';
+                    ctx.beginPath();
+                    ctx.arc(z.x, z.y - 12, 2, 0, Math.PI*2);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+                
+                // Bullets
+                for (let b of bullets) {
+                    ctx.save();
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#ffffb3';
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, BULLET_SIZE, 0, Math.PI*2);
+                    ctx.fillStyle = '#ffffb3';
+                    ctx.fill();
+                    ctx.restore();
+                }
+                
+                // Player
+                ctx.save();
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = currentPlayer === 1 ? '#2a7fff' : '#ff9a3c';
+                ctx.beginPath();
+                ctx.arc(playerX, playerY, PLAYER_SIZE, 0, Math.PI*2);
+                ctx.fillStyle = currentPlayer === 1 ? '#2a7fff' : '#ff9a3c';
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.restore();
+                
+                // Floating texts
+                for (let t of floatingTexts) {
+                    ctx.save();
+                    ctx.font = `bold ${t.size}px "Segoe UI"`;
+                    ctx.fillStyle = t.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'black';
+                    ctx.fillText(t.text, t.x - 20, t.y);
+                    ctx.restore();
+                }
+                
+                // Score
+                ctx.save();
+                ctx.shadowBlur = 10;
+                ctx.font = 'bold 26px "Segoe UI"';
+                ctx.fillStyle = 'white';
+                ctx.fillText(`Score: ${turnScore}`, 30, 70);
+                
+                // High score
+                ctx.font = 'bold 18px "Segoe UI"';
+                ctx.fillStyle = '#ffaa33';
+                ctx.fillText(`🏆 High: ${highScore}`, 30, 110);
+                
+                // Power-up indicators
+                if (rapidFire) {
+                    ctx.fillStyle = '#ffaa33';
+                    ctx.fillText('⚡ RAPID FIRE', W - 200, 70);
+                }
+                if (doublePoints) {
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.fillText('2x POINTS', W - 200, 110);
+                }
+                
+                ctx.restore();
+                
+                if (!gameActive) {
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.globalAlpha = 1;
+                    ctx.save();
+                    ctx.font = '40px "Segoe UI"';
+                    ctx.fillStyle = '#ffdb99';
+                    ctx.shadowBlur = 20;
+                    ctx.fillText('⏸ PAUSED', 280, 250);
+                    ctx.restore();
+                }
+                
+                ctx.restore(); // For screen shake
+            }
+            
+            // ========== KEYBOARD ==========
+            function keyDown(e) {
+                const key = e.key;
+                if (document.activeElement === p1Input || document.activeElement === p2Input) return;
+                
+                if (key === 'Enter') {
+                    e.preventDefault();
+                    if (!gameActive) {
+                        startTurn();
+                    }
+                    return;
+                }
+                
+                if (key === 'Escape') {
+                    e.preventDefault();
+                    if (gameActive) {
+                        gameActive = false;
+                        if (gameTimer) { clearInterval(gameTimer); gameTimer = null; }
+                        helpMessage.innerHTML = `⏸️ GAME PAUSED · <span style="color:#ffdb99">PRESS ENTER</span> to resume <span>${currentPlayer === 1 ? getP1Name() : getP2Name()}</span>'s turn`;
+                    }
+                    return;
+                }
+                
+                if (!gameActive) return;
+                
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(key)) e.preventDefault();
+                if (key === 'ArrowUp') up = true;
+                if (key === 'ArrowDown') down = true;
+                if (key === 'ArrowLeft') left = true;
+                if (key === 'ArrowRight') right = true;
+                if (key === ' ') space = true;
+            }
+            
+            function keyUp(e) {
+                const key = e.key;
+                if (key === 'ArrowUp') up = false;
+                if (key === 'ArrowDown') down = false;
+                if (key === 'ArrowLeft') left = false;
+                if (key === 'ArrowRight') right = false;
+                if (key === ' ') space = false;
+            }
+            
+            window.addEventListener('keydown', keyDown);
+            window.addEventListener('keyup', keyUp);
+            
+            // ========== TOUCH & MOBILE ==========
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!gameActive) return;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                let touchX = (touch.clientX - rect.left) * scaleX;
+                let touchY = (touch.clientY - rect.top) * scaleY;
+                playerX = Math.min(Math.max(touchX, PLAYER_SIZE), currentPlayer === 1 ? MID - 10 : W - PLAYER_SIZE);
+                playerY = Math.min(Math.max(touchY, PLAYER_SIZE), H - PLAYER_SIZE);
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!gameActive) return;
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                let touchX = (touch.clientX - rect.left) * scaleX;
+                let touchY = (touch.clientY - rect.top) * scaleY;
+                playerX = Math.min(Math.max(touchX, PLAYER_SIZE), currentPlayer === 1 ? MID - 10 : W - PLAYER_SIZE);
+                playerY = Math.min(Math.max(touchY, PLAYER_SIZE), H - PLAYER_SIZE);
+            });
+            
+            // Mobile buttons
+            function setHandler(btn, keyVar, value) {
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); keyVar = value; });
+                btn.addEventListener('touchend', (e) => { e.preventDefault(); keyVar = false; });
+                btn.addEventListener('mousedown', (e) => { e.preventDefault(); keyVar = value; });
+                btn.addEventListener('mouseup', (e) => { e.preventDefault(); keyVar = false; });
+                btn.addEventListener('mouseleave', (e) => { keyVar = false; });
+            }
+            setHandler(mobileUp, up, true);
+            setHandler(mobileDown, down, true);
+            setHandler(mobileLeft, left, true);
+            setHandler(mobileRight, right, true);
+            
+            mobileFire.addEventListener('touchstart', (e) => { 
+                e.preventDefault(); space = true; 
+                if (gameActive && shotCooldown <= 0) shoot(); 
+            });
+            mobileFire.addEventListener('touchend', (e) => { e.preventDefault(); space = false; });
+            mobileFire.addEventListener('mousedown', (e) => { e.preventDefault(); space = true; });
+            mobileFire.addEventListener('mouseup', (e) => { e.preventDefault(); space = false; });
+            
+            // ========== RESTART ==========
+            function restartGame() {
+                winnerOverlay.classList.add('hidden');
+                currentPlayer = 1;
+                totalP1 = 0; totalP2 = 0; turnScore = 0;
+                combo = 0; headshots = 0; totalKills = 0;
+                floatingTexts = [];
+                powerUps = [];
+                if (gameTimer) { clearInterval(gameTimer); gameTimer = null; }
+                gameActive = false;
+                playerX = 150; playerY = H/2;
+                bullets = []; zombies = [];
+                timerDisplay.textContent = '30';
+                comboIndicator.style.display = 'none';
+                rapidFire = false;
+                doublePoints = false;
+                if (powerUpTimer) clearTimeout(powerUpTimer);
+                updateUITurnAndScores();
+                helpMessage.innerHTML = `⏸️ GAME PAUSED · <span style="color:#ffdb99">PRESS ENTER</span> to start <span>${getP1Name()}</span>'s turn`;
+                canvas.focus();
+            }
+            
+            restartButton.addEventListener('click', restartGame);
+            p1Input.addEventListener('input', updateUITurnAndScores);
+            p2Input.addEventListener('input', updateUITurnAndScores);
+            
+            // Initial paused state
+            restartGame();
+            
+            // Game loop
+            function gameLoop() {
+                if (gameActive) update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+            gameLoop();
+        })();
+    </script>
+</body>
+</html>
